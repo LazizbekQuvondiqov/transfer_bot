@@ -1,0 +1,30 @@
+# Python va tizim fayllari
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+.idea/
+
+# Virtual muhit (agar bor bo'lsa)
+venv/
+.venv/
+env/
+
+# Xavfsizlik (ENG MUHIM QISM)
+.env
+config.py  # Agar config.py ichida parollar qolib ketgan bo'lsa, buni ham qo'shing. Agar hammasi .env da bo'lsa, config.py ni yuklasa bo'ladi.
+
+# Ma'lumotlar bazasi
+*.db
+*.sqlite
+*.sqlite3
+transfer.db
+
+# Tahlil fayllari va Excel/CSV (GitHubga kerak emas)
+*.csv
+*.xlsx
+*.xls
+Billz_Tarix_Batafsil.csv
+
+# Loglar
+*.log
