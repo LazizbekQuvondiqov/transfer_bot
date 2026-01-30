@@ -312,10 +312,10 @@ def run_transfer_analysis(
 
     print("⚙️ Joylashuv aniqlanmoqda...")
 
-    # Apply funksiyasi endi kafolatlangan holda 2 ta ustun qaytaradi
-    df_full[['Qayerdan', 'Qayerga']] = df_full.apply(
-        lambda row: pd.Series(joylashuvni_aniqlash(row)), axis=1
-    )
+# TUZATILGAN VARIANT: result_type='expand' ishlatish shart
+    joylashuv_df = df_full.apply(joylashuvni_aniqlash, axis=1, result_type='expand')
+    df_full['Qayerdan'] = joylashuv_df[0]
+    df_full['Qayerga'] = joylashuv_df[1]
 
     # 5. TARJIMA
     tarjima = {
