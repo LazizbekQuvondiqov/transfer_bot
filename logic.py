@@ -685,20 +685,54 @@ def run_advanced_sales_analysis(target_subcat=None):
     return file_name, f"📊 <b>DO'KONLAR KESIMIDA (TO'LIQ)</b>\n\nJami: {len(df_res)} ta qator."
 
 def init_cache_table():
-    """Kesh jadvalini yaratish (birinchi ishga tushganda)"""
+    """Baza tuzilmasini yaratish (birinchi ishga tushganda)"""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
+    # 1. Kesh jadvali
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cache_metadata (
             podkategoriya TEXT PRIMARY KEY,
             last_updated DATE NOT NULL
         )
     """)
+
+    # 2. Tarix jadvali (d_History) - MUHIM QISM SHU YERDA
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS d_History (
+            product_id TEXT,
+            sana TIMESTAMP,
+            turi TEXT,
+            miqdor REAL,
+            from_shop_id TEXT,
+            to_shop_id TEXT
+        )
+    """)
+
+    # 3. Mahsulotlar jadvali (d_Mahsulotlar)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS d_Mahsulotlar (
+            product_id TEXT PRIMARY KEY,
+            Kategoriya TEXT,
+            Подкатегория TEXT,
+            Баркод TEXT,
+            Цвет TEXT,
+            Материал TEXT,
+            Вид TEXT,
+            Sotuv_Narxi REAL,
+            Tannarx REAL,
+            Aksiya_Narxi REAL,
+            Артикул TEXT,
+            Наименование TEXT,
+            import_date TEXT,
+            Поставщик TEXT,
+            Qoldiq REAL
+        )
+    """)
     
     conn.commit()
     conn.close()
-    print("✅ cache_metadata jadvali tayyor.")
+    print("✅ Baza jadvallari (cache, History, Mahsulotlar) tekshirildi va tayyor.")
 
 
 def is_cache_valid(podkat: str) -> bool:
