@@ -231,8 +231,8 @@ def run_transfer_analysis(
     FILE_NAME,
     TARGET_PODKAT,
     LIDER_LIMIT=50,
-    MIN_DAYS_ON_SHELF=13,
-    TARGET_SOLO=14
+    MIN_DAYS_ON_SHELF=9,
+    TARGET_SOLO=13
 ):
 
 
