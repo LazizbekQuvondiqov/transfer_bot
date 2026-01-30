@@ -26,12 +26,12 @@ ADMIN_ID = int(must("ADMIN_ID"))
 # -----------------------------
 # Webhook Configuration
 # -----------------------------
-WEBHOOK_HOST = must("WEBHOOK_HOST")
-WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+# WEBHOOK_HOST = must("WEBHOOK_HOST")
+# WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
+# WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
-WEBAPP_HOST = "0.0.0.0"
-WEBAPP_PORT = int(os.getenv("WEBAPP_PORT", 8000))  # default 8000
+# WEBAPP_HOST = "0.0.0.0"
+# WEBAPP_PORT = int(os.getenv("WEBAPP_PORT", 8000))  # default 8000
 
 # -----------------------------
 # API Configuration
