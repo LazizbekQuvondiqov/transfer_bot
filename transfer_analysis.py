@@ -133,14 +133,28 @@ def update_db_by_category(target_category):
     
     # ✅ 0. KESHNI TEKSHIRISH
     if is_cache_valid(target_category):
-        print(f"✅ '{target_category}' bugungi kesh mavjud. API chaqirilmaydi.")
         return True, f"✅ '{target_category}' ma'lumotlari bugun yangilangan (keshdan olindi)."
     
     print(f"🔄 '{target_category}' uchun tarix yangilanmoqda...")
     
-    # ✅ 1. BAZADAN PRODUCT_ID LARNI OLISH
     conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+
+    # --- 🔥 MUHIM O'ZGARISH: Jadval yo'q bo'lsa, yaratib olamiz ---
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS d_History (
+            product_id TEXT,
+            sana TIMESTAMP,
+            turi TEXT,
+            miqdor REAL,
+            from_shop_id TEXT,
+            to_shop_id TEXT
+        )
+    """)
+    conn.commit()
+    # -------------------------------------------------------------
     
+    # ✅ 1. BAZADAN PRODUCT_ID LARNI OLISH
     try:
         df_products = pd.read_sql(
             "SELECT product_id FROM d_Mahsulotlar WHERE Подкатегория = ?",
@@ -149,7 +163,7 @@ def update_db_by_category(target_category):
         )
     except Exception as e:
         conn.close()
-        return False, f"❌ Baza xatosi: {e}"
+        return False, f"❌ Baza xatosi (Mahsulotlar o'qishda): {e}"
     
     if df_products.empty:
         conn.close()
@@ -161,7 +175,6 @@ def update_db_by_category(target_category):
     # ✅ 2. ESKI TARIXNI O'CHIRISH (Faqat shu kategoriya uchun)
     try:
         placeholders = ','.join('?' * len(product_ids))
-        cursor = conn.cursor()
         cursor.execute(
             f"DELETE FROM d_History WHERE product_id IN ({placeholders})",
             product_ids
@@ -190,12 +203,13 @@ def update_db_by_category(target_category):
                 all_history.extend(data)
             
             completed += 1
-            if completed % 100 == 0:
+            if completed % 50 == 0:
                 print(f"   ⏳ Progress: {completed}/{len(product_ids)}")
     
     # ✅ 4. TARIXNI BAZAGA YOZISH
     if all_history:
         df_history = pd.DataFrame(all_history)
+        # if_exists='append' juda muhim, chunki jadvalni tepadagi CREATE bilan yaratib oldik
         df_history.to_sql("d_History", conn, if_exists="append", index=False)
         msg = f"✅ '{target_category}' tarixi yangilandi! {len(product_ids)} ta tovar, {len(df_history)} ta harakat."
     else:
@@ -207,7 +221,6 @@ def update_db_by_category(target_category):
     update_cache_metadata(target_category)
     
     return True, msg
-
 SHOP_MAP = {
         "31f89356-817d-4a07-abff-6edb45002801": "Dressco Integro",
         "b7889973-6162-4358-a083-04c685404070": "ANDALUS",
