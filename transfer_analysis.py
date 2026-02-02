@@ -26,7 +26,7 @@ from config import (
 )
 
 
-MAX_WORKERS = 25 # Optimal tezlik
+MAX_WORKERS = 5 # Optimal tezlik
 
 def get_session():
     s = requests.Session()
