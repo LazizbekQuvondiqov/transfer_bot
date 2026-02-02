@@ -275,12 +275,34 @@ async def markdown_sub_menu(callback: CallbackQuery):
 async def back_to_markdown_cats(callback: CallbackQuery):
     await markdown_menu(callback.message)
 
+# ... (tepadagi importlar va boshqa kodlar o'zgarishsiz qoladi)
+
 @dp.callback_query(F.data.startswith("msub:"))
 async def run_markdown_job(callback: CallbackQuery):
     sub_cat = callback.data.split(":", 1)[1]
-    status_msg = await callback.message.edit_text(f"📉 <b>{sub_cat}</b> (Skidka)...\nHisoblanmoqda...", parse_mode="HTML")
+    
+    # --- 1. YANGI QO'SHILGAN QISM: BAZANI YANGILASH ---
+    # Skidka analiz qilishdan oldin, API dan ma'lumotlarni tortib, 
+    # d_History jadvalini yaratib olishimiz shart.
+    
+    await callback.message.edit_text(
+        f"🔄 <b>{sub_cat}</b>\nMa'lumotlar bazasi yangilanmoqda...\nIltimos kuting.", 
+        parse_mode="HTML"
+    )
 
     loop = asyncio.get_event_loop()
+    
+    # Bu funksiya API dan tortadi va 'd_History' jadvalini yaratadi/to'ldiradi
+    success, msg = await loop.run_in_executor(None, update_db_by_category, sub_cat)
+    
+    if not success:
+        await callback.message.edit_text(f"❌ Xatolik: {msg}")
+        return
+    # ----------------------------------------------------
+
+    # --- 2. ENDI ANALIZ QILSA BO'LADI (Eski kod davom etadi) ---
+    status_msg = await callback.message.edit_text(f"📉 <b>{sub_cat}</b> (Skidka)...\nHisoblanmoqda...", parse_mode="HTML")
+
     file_path, stats_msg = await loop.run_in_executor(None, run_markdown_analysis, sub_cat, None)
 
     await status_msg.delete()
@@ -295,8 +317,8 @@ async def run_markdown_job(callback: CallbackQuery):
     except Exception as e:
         await callback.message.answer(f"❌ Fayl yuborishda xato: {e}")
 
+    # Ish tugagach yana menyuga qaytish
     await markdown_menu(callback.message)
-
 # --- MAIN FUNKSIYASI ---
 async def main():
     # ✅ 1. KESH JADVALINI YARATISH (Birinchi marta ishga tushganda)
