@@ -4,7 +4,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import Command 
-
+from aiogram.exceptions import TelegramBadRequest
 from transfer_analysis import run_transfer_analysis, update_db_by_category
 from config import *
 from logic import (
@@ -256,6 +256,7 @@ async def markdown_menu(message: types.Message):
 
     await message.answer("📉 <b>Skidka uchun kategoriya tanlang:</b>", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb_list), parse_mode="HTML")
 
+
 @dp.callback_query(F.data.startswith("mcat:"))
 async def markdown_sub_menu(callback: CallbackQuery):
     cat_name = callback.data.split(":", 1)[1]
@@ -269,8 +270,17 @@ async def markdown_sub_menu(callback: CallbackQuery):
         kb_list.append(row)
     kb_list.append([InlineKeyboardButton(text="🔙 Orqaga", callback_data="back_to_mcats")])
 
-    await callback.message.edit_text(f"📉 <b>{cat_name}</b> (Skidka)\nPodkategoriyani tanlang:", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb_list), parse_mode="HTML")
-
+    # --- O'ZGARTIRILGAN QISM ---
+    try:
+        await callback.message.edit_text(
+            f"📉 <b>{cat_name}</b> (Skidka)\nPodkategoriyani tanlang:", 
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=kb_list), 
+            parse_mode="HTML"
+        )
+    except TelegramBadRequest:
+        # Agar xabar o'zgarmagan bo'lsa, xatoni yutib yuboramiz
+        await callback.answer() # Shunchaki "ok" deb javob qaytarish
+    # ---------------------------
 @dp.callback_query(F.data == "back_to_mcats")
 async def back_to_markdown_cats(callback: CallbackQuery):
     await markdown_menu(callback.message)
