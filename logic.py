@@ -740,10 +740,21 @@ def is_cache_valid(podkat: str) -> bool:
 def update_cache_metadata(podkat: str):
     """
     Kesh metadata ni yangilaydi (bugungi sana bilan).
+    Jadval yo'q bo'lsa, uni avtomatik yaratadi.
     """
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
+    # --- 🔥 YANGI QO'SHILGAN QISM: Jadvalni yaratish ---
+    # Agar baza o'chirilgan bo'lsa, bu yerda jadval qayta tiklanadi
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cache_metadata (
+            podkategoriya TEXT PRIMARY KEY,
+            last_updated DATE NOT NULL
+        )
+    """)
+    # ---------------------------------------------------
+
     today = datetime.now().strftime("%Y-%m-%d")
     
     cursor.execute("""
@@ -754,7 +765,6 @@ def update_cache_metadata(podkat: str):
     conn.commit()
     conn.close()
     print(f"✅ Kesh yangilandi: '{podkat}' → {today}")
-
 
 def clear_category_from_db(podkat: str):
     """
