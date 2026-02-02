@@ -1,5 +1,6 @@
 import logging
 import os
+from config import DB_FILE, ADMIN_ID
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
@@ -329,7 +330,31 @@ async def run_markdown_job(callback: CallbackQuery):
 
     # Ish tugagach yana menyuga qaytish
     await markdown_menu(callback.message)
-# --- MAIN FUNKSIYASI ---
+# --- MAIN FUNKSIYASI --
+# --- bot.py fayliga qo'shing ---
+
+@dp.message(Command("reset_db"))
+async def reset_database_handler(message: types.Message):
+    # Faqat admin ishlata olsin
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    db_path = str(DB_FILE)  # Path obyektini stringga o'giramiz
+    
+    if os.path.exists(db_path):
+        try:
+            # Faylni o'chiramiz
+            os.remove(db_path)
+            await message.answer("🗑️ <b>Baza (transfer.db) muvaffaqiyatli o'chirildi!</b>\n\nEndi botni qayta ishlatganingizda, u toza, yangi baza yaratadi.", parse_mode="HTML")
+            
+            # Keshni ham tozalash uchun (agar kesh jadvali alohida bo'lmasa)
+            print("Serverdagi baza fayli o'chirildi.")
+            
+        except Exception as e:
+            await message.answer(f"❌ Faylni o'chirishda xatolik: {e}")
+    else:
+        await message.answer("⚠️ Serverda 'transfer.db' fayli topilmadi (allaqachon o'chirilgan bo'lishi mumkin).")
+
 async def main():
     # ✅ 1. KESH JADVALINI YARATISH (Birinchi marta ishga tushganda)
     print("🔧 Kesh jadvali tekshirilmoqda...")
